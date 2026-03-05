@@ -1,8 +1,9 @@
-# 固定 LangChain 旧版本（v0.0.350 是最后一批兼容旧导入路径的稳定版）
+# 固定旧版 LangChain（完全兼容你的代码）
 langchain==0.0.350
-# OpenAI 包也建议固定版本，避免兼容性问题
+# 固定 OpenAI 版本（适配旧版 LangChain）
 openai==0.28.1
-# Streamlit 保持最新即可，或也固定版本
-streamlit>=1.28.0
-# 其他依赖（如果用到）
-python-dotenv>=1.0.0
+# Streamlit 版本（兼容即可）
+streamlit==1.32.2
+# 补充依赖（解决 ConversationSummaryMemory 可能的依赖问题）
+pyyaml
+tenacity
