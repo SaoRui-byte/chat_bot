@@ -1,5 +1,6 @@
 streamlit
 langchain
-openai
+langchain-core
+langchain-community
 langchain-openai
-langchain-community  # 如果使用了 ConversationChain 等旧版组件，可能需要这个包
+openai
