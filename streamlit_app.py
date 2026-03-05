@@ -1,7 +1,7 @@
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_community.memory import ConversationBufferMemory, ConversationSummaryMemory
-from langchain_community.chains import ConversationChain
-from langchain_openai import ChatOpenAI
+from langchain.chains import ConversationChain
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.memory import ConversationBufferMemory
+from langchain.chat_models import ChatOpenAI  # 旧版的 ChatOpenAI 导入路径
 import streamlit as st
 
 client = ChatOpenAI(
@@ -71,6 +71,7 @@ if user_input:
         response = generate_response(user_input,subject,style,st.session_state['memory'])
     st.chat_message('ai').write(response)
     st.session_state['messages'].append({'role':'ai','content':response})
+
 
 
 
