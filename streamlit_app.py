@@ -1,11 +1,10 @@
-# 新版 LangChain 正确导入路径
-from langchain_community.chains import ConversationChain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_community.memory import ConversationSummaryMemory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from langchain_openai import ChatOpenAI
 import streamlit as st
 
-# 初始化 DeepSeek 客户端（新版写法）
+# 初始化 DeepSeek 客户端
 client = ChatOpenAI(
     api_key=st.secrets['OPENAI_API_KEY'],
     model='deepseek-chat',
@@ -19,19 +18,14 @@ with st.sidebar:
     style = st.selectbox("讲解风格", options=['简洁', '详细'])
 user_input = st.chat_input("请输入你的问题:")
 
-# 初始化会话状态（兼容新版 Memory）
-if 'messages' not in st.session_state:
-    st.session_state['messages'] = [{'role':'ai','content':'你好，我是你的学习助手!'}]
-    # 新版 ConversationSummaryMemory 初始化（参数不变）
-    st.session_state['memory'] = ConversationSummaryMemory(
-        memory_key='chat_history',
-        return_messages=True,
-        llm=client  # 新版需要显式传入 LLM 用于总结
-    )
+# 初始化 Streamlit 会话消息历史
+if 'chat_history' not in st.session_state:
+    st.session_state['chat_history'] = StreamlitChatMessageHistory(key="chat_history")
+    st.session_state['chat_history'].add_ai_message("你好，我是你的学习助手!")
 
 # 显示历史消息
-for msg in st.session_state['messages']:
-    st.chat_message(msg['role']).write(msg['content'])
+for msg in st.session_state['chat_history'].messages:
+    st.chat_message(msg.type).write(msg.content)
 
 def get_prompt_template(subject, style):
     style_dict = {
@@ -54,30 +48,36 @@ def get_prompt_template(subject, style):
 {style}
 
 请严格遵守以上规则。"""
-    # 新版 ChatPromptTemplate 写法（兼容旧版）
-    prompt_template = ChatPromptTemplate.from_messages([
-        ('system', system_template),
-        MessagesPlaceholder(variable_name='chat_history'),
-        ('human', '{input}')
+    # 新版提示词模板
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_template),
+        MessagesPlaceholder(variable_name="history"),
+        ("human", "{input}")
     ])
-    # 绑定部分变量（新版写法）
-    prompt_template = prompt_template.partial(subject=subject, style=style_dict[style])
-    return prompt_template
+    return prompt.partial(subject=subject, style=style_dict[style])
 
-def generate_response(user_input, subject, style, memory):
+def generate_response(user_input, subject, style):
+    # 1. 获取提示词模板
     prompt = get_prompt_template(subject, style)
-    # 新版 ConversationChain 初始化（参数不变）
-    chain = ConversationChain(llm=client, memory=memory, prompt=prompt)
-    # 新版 invoke 调用（返回格式不变）
-    response = chain.invoke({'input': user_input})
-    return response['response']
+    # 2. 构建基础链
+    chain = prompt | client
+    # 3. 包装成带历史的对话链（核心替代 ConversationChain）
+    chat_chain = RunnableWithMessageHistory(
+        chain,
+        lambda session_id: st.session_state['chat_history'],
+        input_messages_key="input",
+        history_messages_key="history"
+    )
+    # 4. 调用链
+    response = chat_chain.invoke(
+        {"input": user_input},
+        config={"configurable": {"session_id": "default"}}
+    )
+    return response.content
 
 # 处理用户输入
 if user_input:
     st.chat_message('human').write(user_input)
-    st.session_state['messages'].append({'role':'human','content':user_input})
-
     with st.spinner('AI正在思考中，请稍候......'):
-        response = generate_response(user_input, subject, style, st.session_state['memory'])
+        response = generate_response(user_input, subject, style)
     st.chat_message('ai').write(response)
-    st.session_state['messages'].append({'role':'ai','content':response})
