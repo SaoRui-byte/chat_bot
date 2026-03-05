@@ -1,9 +1,12 @@
-# 固定旧版 LangChain（完全兼容你的代码）
-langchain==0.0.350
-# 固定 OpenAI 版本（适配旧版 LangChain）
-openai==0.28.1
-# Streamlit 版本（兼容即可）
-streamlit==1.32.2
-# 补充依赖（解决 ConversationSummaryMemory 可能的依赖问题）
+# 新版 LangChain 核心包
+langchain>=0.1.10
+langchain-core>=0.1.28
+langchain-community>=0.0.28
+langchain-openai>=0.1.0
+# OpenAI 新版
+openai>=1.13.3
+# Streamlit
+streamlit>=1.32.2
+# 其他依赖
 pyyaml
 tenacity
