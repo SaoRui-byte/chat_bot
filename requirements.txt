@@ -1,6 +1,8 @@
-streamlit
-langchain
-langchain-core
-langchain-community
-langchain-openai
-openai
+# 固定 LangChain 旧版本（v0.0.350 是最后一批兼容旧导入路径的稳定版）
+langchain==0.0.350
+# OpenAI 包也建议固定版本，避免兼容性问题
+openai==0.28.1
+# Streamlit 保持最新即可，或也固定版本
+streamlit>=1.28.0
+# 其他依赖（如果用到）
+python-dotenv>=1.0.0
