@@ -1,5 +1,4 @@
 from langchain_openai import ChatOpenAI
-from langchain.chains import ConversationChain
 from langchain.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory,ConversationSummaryMemory
 from langchain_community.chains import ConversationChain
@@ -72,5 +71,6 @@ if user_input:
         response = generate_response(user_input,subject,style,st.session_state['memory'])
     st.chat_message('ai').write(response)
     st.session_state['messages'].append({'role':'ai','content':response})
+
 
 
