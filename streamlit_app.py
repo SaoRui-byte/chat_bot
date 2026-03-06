@@ -4,7 +4,6 @@ from langchain_community.chat_message_histories import StreamlitChatMessageHisto
 from langchain_openai import ChatOpenAI
 import streamlit as st
 
-# 初始化 DeepSeek 客户端
 client = ChatOpenAI(
     api_key=st.secrets['OPENAI_API_KEY'],
     model='deepseek-chat',
@@ -14,7 +13,7 @@ client = ChatOpenAI(
 
 st.title("学习助手")
 with st.sidebar:
-    subject = st.selectbox("选择学科", options=['计算机', 'AI'])
+    subject = st.selectbox("选择学科", options=['计算机', 'AI','数学与应用数学','抽象代数','高等代数','撩妹（恋爱）'])
     style = st.selectbox("讲解风格", options=['简洁', '详细'])
 user_input = st.chat_input("请输入你的问题:")
 
@@ -81,3 +80,4 @@ if user_input:
     with st.spinner('AI正在思考中，请稍候......'):
         response = generate_response(user_input, subject, style)
     st.chat_message('ai').write(response)
+
